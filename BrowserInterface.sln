@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrowserInterface", "BrowserInterface\BrowserInterface.csproj", "{25F2C3E2-49C5-49EA-88E0-E35862D9C7AD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25F2C3E2-49C5-49EA-88E0-E35862D9C7AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25F2C3E2-49C5-49EA-88E0-E35862D9C7AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25F2C3E2-49C5-49EA-88E0-E35862D9C7AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25F2C3E2-49C5-49EA-88E0-E35862D9C7AD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B186612A-5FE3-4C2A-B669-E4F6B6A2C43C}
+	EndGlobalSection
+EndGlobal
