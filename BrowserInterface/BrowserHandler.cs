@@ -15,39 +15,39 @@ namespace BrowserInterface
         /// <summary>
         /// The list of characters which should be ignored for unix.
         /// </summary>
-        private readonly List<string> UnixTerminalCharacters = new List<string>
+        private readonly List<char> _unixTerminalCharacters = new List<char>
         {
-            "\n",
-            "|",
-            "&",
-            "\r",
-            "\\",
-            ";"
+            '\n',
+            '|',
+            '&',
+            '\r',
+            '\\',
+            ';'
         };
 
         /// <summary>
         /// The list of characters which should be ignored for windows.
         /// </summary>
-        private readonly List<string> WindowsTerminalCharacters = new List<string>
+        private readonly List<char> _windowsTerminalCharacters = new List<char>
         {
-            "\n",
-            "\r",
-            "&",
-            "^",
-            "\\",
-            ";"
+            '\n',
+            '\r',
+            '&',
+            '^',
+            '\\',
+            ';'
         };
 
         /// <summary>
         /// The list of characters which should be ignored for osx.
         /// </summary>
-        private readonly List<string> MacTerminalCharacters = new List<string>
+        private readonly List<char> _macTerminalCharacters = new List<char>
         {
-            "\n",
-            "&",
-            "|",
-            "\\",
-            ";"
+            '\n',
+            '&',
+            '|',
+            '\\',
+            ';'
         };
 
         /// <summary>
@@ -70,11 +70,16 @@ namespace BrowserInterface
         /// </summary>
         public BrowserHandler()
         {
-            this._process = new Process();
-            this._process.StartInfo.RedirectStandardInput = true;
-            this._process.StartInfo.RedirectStandardOutput = true;
-            this._process.StartInfo.CreateNoWindow = true;
-            this._process.StartInfo.UseShellExecute = false;
+            this._process = new Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                    UseShellExecute = true
+                }
+            };
 
             this._stringBuilder = new StringBuilder();
         }
@@ -110,31 +115,21 @@ namespace BrowserInterface
         /// <param name="queryParams"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        private static (string, Dictionary<string, string>) SanitizeInput(List<string> forbiddenSubStrings, string url, Dictionary<string, object>? queryParams = null)
+        private static (string, Dictionary<string, string>) SanitizeInput(List<char> forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
         {
             Dictionary<string, string> paramOut = new Dictionary<string, string> { };
 
             string urlOut = url;
 
-            foreach (string subString in forbiddenSubStrings)
-            {
-                urlOut = urlOut.Replace(subString, string.Empty);
-            }
+            urlOut = new string(urlOut.Where(c => !forbiddenCharacters.Contains(c)).ToArray());
 
-            if (queryParams is Dictionary<string, object> @params && @params.Count > 0)
+            if (queryParams is Dictionary<string, object> { Count: > 0 } @params)
             {
                 foreach (KeyValuePair<string, object> kvp in @params)
                 {
-                    string key = kvp.Key;
+                    string key = new string(kvp.Key.Where(c => !forbiddenCharacters.Contains(c)).ToArray());
 
-                    string valueString = kvp.Value.ToString() ?? string.Empty;
-
-                    foreach (string subString in forbiddenSubStrings)
-                    {
-                        key = key.Replace(subString, string.Empty);
-
-                        valueString = valueString.Replace(subString, string.Empty);
-                    }
+                    string valueString = new string(kvp.Value.ToString()?.Where(c => !forbiddenCharacters.Contains(c)).ToArray());
 
                     if (!paramOut.TryAdd(key, valueString))
                     {
@@ -159,7 +154,7 @@ namespace BrowserInterface
             this._stringBuilder.Append(' ');
             this._stringBuilder.Append(url);
 
-            if (queryParams is Dictionary<string, string> @params && @params.Count > 0)
+            if (queryParams is Dictionary<string, string> { Count: > 0 } @params)
             {
                 this._stringBuilder.Append('?');
 
@@ -174,11 +169,9 @@ namespace BrowserInterface
                 this._stringBuilder.Length -= paramSeparator.Length;
             }
 
-            Debug.WriteLine(this._stringBuilder.ToString());
-
             this._process.StartInfo.FileName = shellName;
             this._process.Start();
-            this._process.StandardInput.WriteLine(this._stringBuilder.ToString());
+            this._process.StandardInput.WriteLine(this._stringBuilder);
             this._process.StandardInput.Flush();
             this._process.StandardInput.Close();
             this._process.WaitForExit();
@@ -192,7 +185,7 @@ namespace BrowserInterface
         /// <param name="queryParams">The query parameters to append.</param>
         private void OpenUrlMac(string url, Dictionary<string, object>? queryParams = null)
         {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(this.MacTerminalCharacters, url, queryParams);
+            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(this._macTerminalCharacters, url, queryParams);
 
             this.OpenUrlRaw("bash", "open", url, "\\&", sanitizedParams);
         }
@@ -205,7 +198,7 @@ namespace BrowserInterface
         /// <param name="queryParams">The query parameters to append.</param>
         private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null)
         {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(this.UnixTerminalCharacters, url, queryParams);
+            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(this._unixTerminalCharacters, url, queryParams);
 
             this.OpenUrlRaw("bash", "xdg-open", url, "\\&", sanitizedParams);
         }
@@ -218,7 +211,7 @@ namespace BrowserInterface
         /// <param name="queryParams">The query parameters to append.</param>
         private void OpenUrlWindows(string url, Dictionary<string, object>? queryParams = null)
         {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(this.WindowsTerminalCharacters, url, queryParams);
+            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(this._windowsTerminalCharacters, url, queryParams);
 
             this.OpenUrlRaw("cmd", "start", url, "^&", sanitizedParams);
         }
