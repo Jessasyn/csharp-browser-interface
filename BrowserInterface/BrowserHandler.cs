@@ -163,7 +163,7 @@ namespace BrowserInterface
                 {
                     this._stringBuilder.Append(kvp.Key);
                     this._stringBuilder.Append('=');
-                    this._stringBuilder.Append($"{kvp.Value}");
+                    this._stringBuilder.Append(kvp.Value);
                     this._stringBuilder.Append(paramSeparator);
                 }
 
@@ -239,8 +239,8 @@ namespace BrowserInterface
 
         public sealed override string ToString() => $"{this._process.ProcessName}-{this._stringBuilder.Length}-{this._disposed}";
 
-        public  sealed override int GetHashCode() => HashCode.Combine(this._process, 
-                                                                     this._stringBuilder, 
+        public  sealed override int GetHashCode() => HashCode.Combine(this._process,
+                                                                     this._stringBuilder,
                                                                      this._disposed);
     }
 }
