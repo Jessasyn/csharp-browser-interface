@@ -10,12 +10,13 @@ namespace BrowserInterface
     /// A simple class, which simplifies opening a GET URL in the browser of the user, optionally with query parameters. <br/>
     /// For (hopefully) obvious reasons, POST is not supported.
     /// </summary>
+    [DebuggerDisplay($"{{{nameof(ToString)}(),nq}}")]
     public sealed class BrowserHandler : IDisposable
     {
         /// <summary>
         /// The list of characters which should be ignored for unix.
         /// </summary>
-        private readonly List<char> _unixTerminalCharacters = new List<char>
+        private static readonly List<char> _unixTerminalCharacters = new List<char>
         {
             '\n',
             '|',
@@ -28,7 +29,7 @@ namespace BrowserInterface
         /// <summary>
         /// The list of characters which should be ignored for windows.
         /// </summary>
-        private readonly List<char> _windowsTerminalCharacters = new List<char>
+        private static readonly List<char> _windowsTerminalCharacters = new List<char>
         {
             '\n',
             '\r',
@@ -41,7 +42,7 @@ namespace BrowserInterface
         /// <summary>
         /// The list of characters which should be ignored for osx.
         /// </summary>
-        private readonly List<char> _macTerminalCharacters = new List<char>
+        private static readonly List<char> _macTerminalCharacters = new List<char>
         {
             '\n',
             '&',
@@ -185,7 +186,7 @@ namespace BrowserInterface
         /// <param name="queryParams">The query parameters to append.</param>
         private void OpenUrlMac(string url, Dictionary<string, object>? queryParams = null)
         {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(this._macTerminalCharacters, url, queryParams);
+            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_macTerminalCharacters, url, queryParams);
 
             this.OpenUrlRaw("bash", "open", url, "\\&", sanitizedParams);
         }
@@ -198,7 +199,7 @@ namespace BrowserInterface
         /// <param name="queryParams">The query parameters to append.</param>
         private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null)
         {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(this._unixTerminalCharacters, url, queryParams);
+            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_unixTerminalCharacters, url, queryParams);
 
             this.OpenUrlRaw("bash", "xdg-open", url, "\\&", sanitizedParams);
         }
@@ -211,7 +212,7 @@ namespace BrowserInterface
         /// <param name="queryParams">The query parameters to append.</param>
         private void OpenUrlWindows(string url, Dictionary<string, object>? queryParams = null)
         {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(this._windowsTerminalCharacters, url, queryParams);
+            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_windowsTerminalCharacters, url, queryParams);
 
             this.OpenUrlRaw("cmd", "start", url, "^&", sanitizedParams);
         }
@@ -235,5 +236,11 @@ namespace BrowserInterface
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        public sealed override string ToString() => $"{this._process.ProcessName}-{this._stringBuilder.Length}-{this._disposed}";
+
+        public  sealed override int GetHashCode() => HashCode.Combine(this._process, 
+                                                                     this._stringBuilder, 
+                                                                     this._disposed);
     }
 }
