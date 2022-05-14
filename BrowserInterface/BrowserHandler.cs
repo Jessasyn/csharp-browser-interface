@@ -7,9 +7,9 @@ using System.Text;
 namespace BrowserInterface
 {
     /// <summary>
-    /// A simple class, which simplifies opening a <see cref="HttpMethod.Get"/> URL in the browser of the user, optionally with query parameters. <br/>
+    /// A simple class, which simplifies opening a <see cref="HttpMethod.Get"/> URL in the (default) browser of the user, optionally with query parameters. <br/>
     /// For (hopefully) obvious reasons, <see cref="HttpMethod.Post"/> is not supported. <br/>
-    /// It is encouraged to use the browserhandler as service, or inside a <see langword="using"/> statement, so no memory leaks occur, however small.
+    /// It is encouraged to use the <see cref="BrowserHandler"/> as service, or inside a <see langword="using"/> statement, so no memory leaks occur, however small.
     /// </summary>
     [DebuggerDisplay($"{{{nameof(ToString)}(),nq}}")]
     public sealed class BrowserHandler : IDisposable
@@ -89,6 +89,7 @@ namespace BrowserInterface
         /// <summary>
         /// Opens the <paramref name="url"/> in the default browser of the user, with the provided <paramref name="queryParams"/>. <br/>
         /// This method works on mac, unix and windows.
+        /// Elements in the <paramref name="queryParams"/> dictionary will be converted to their string representation, but are <see cref="object"/> to allow for more concise method calls.
         /// </summary>
         /// <param name="url"></param>
         /// <param name="queryParams"></param>
@@ -135,7 +136,7 @@ namespace BrowserInterface
 
         /// <summary>
         /// Using the provided <paramref name="shellName"/>, executes <paramref name="command"/> to open a <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
-        /// This method is platform independant.
+        /// This method is platform independant. <br/>
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
