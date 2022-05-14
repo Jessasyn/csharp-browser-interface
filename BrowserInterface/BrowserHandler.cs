@@ -128,8 +128,8 @@ namespace BrowserInterface
 
             Dictionary<string, string> paramOut = new Dictionary<string, string> { };
 
-            if (queryParams is Dictionary<string, object> { Count: > 0 } @params && 
-                @params.Select(kvp => paramOut.TryAdd(kvp.Key.Filter(forbiddenCharacters), 
+            if (queryParams is Dictionary<string, object> { Count: > 0 } @params &&
+                @params.Select(kvp => paramOut.TryAdd(kvp.Key.Filter(forbiddenCharacters),
                                                       kvp.Value.ToString().Filter(forbiddenCharacters)))
                        .Any(k => !k))
             {

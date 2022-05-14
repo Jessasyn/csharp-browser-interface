@@ -13,7 +13,7 @@
         /// <returns>The filtered string, or the empty string, if the input was null.</returns>
         public static string Filter(this string? @string, char[] toRemove)
         {
-            if(@string is null)
+            if (@string is null)
             {
                 return string.Empty;
             }
