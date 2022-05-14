@@ -79,7 +79,7 @@ namespace BrowserInterface
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true,
-                    UseShellExecute = true
+                    UseShellExecute = false
                 }
             };
 
@@ -140,18 +140,20 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlRaw(string shellName, string command, string url, string paramSeparator, Dictionary<string, string>? queryParams = null)
+        private void OpenUrlRaw(string shellName, string command, string url, string paramSeparator, char[] forbiddenCharacters, Dictionary<string, object>? queryParams = null)
         {
+            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(forbiddenCharacters, url, queryParams);
+
             this._stringBuilder.Clear();
             this._stringBuilder.Append(command);
             this._stringBuilder.Append(' ');
             this._stringBuilder.Append(url);
 
-            if (queryParams is Dictionary<string, string> { Count: > 0 } @params)
+            if (sanitizedParams.Count > 0)
             {
                 this._stringBuilder.Append('?');
 
-                foreach (KeyValuePair<string, string> kvp in @params)
+                foreach (KeyValuePair<string, string> kvp in sanitizedParams)
                 {
                     this._stringBuilder.Append(kvp.Key);
                     this._stringBuilder.Append('=');
@@ -179,9 +181,7 @@ namespace BrowserInterface
         /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
         private void OpenUrlMac(string url, Dictionary<string, object>? queryParams = null)
         {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_macTerminalCharacters, url, queryParams);
-
-            this.OpenUrlRaw("bash", "open", url, "\\&", sanitizedParams);
+            this.OpenUrlRaw("bash", "open", url, "\\&", _macTerminalCharacters, queryParams);
         }
 
         /// <summary>
@@ -193,9 +193,7 @@ namespace BrowserInterface
         /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
         private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null)
         {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_unixTerminalCharacters, url, queryParams);
-
-            this.OpenUrlRaw("bash", "xdg-open", url, "\\&", sanitizedParams);
+            this.OpenUrlRaw("bash", "xdg-open", url, "\\&", _unixTerminalCharacters, queryParams);
         }
 
         /// <summary>
@@ -208,9 +206,7 @@ namespace BrowserInterface
 
         private void OpenUrlWindows(string url, Dictionary<string, object>? queryParams = null)
         {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_windowsTerminalCharacters, url, queryParams);
-
-            this.OpenUrlRaw("cmd", "start", url, "^&", sanitizedParams);
+            this.OpenUrlRaw("cmd", "start", url, "^&", _windowsTerminalCharacters, queryParams);
         }
 
         /// <summary>
