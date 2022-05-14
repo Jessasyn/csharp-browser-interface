@@ -15,9 +15,9 @@ namespace BrowserInterface
     public sealed class BrowserHandler : IDisposable
     {
         /// <summary>
-        /// The list of characters which should be ignored for unix.
+        /// The array of characters which should be ignored for unix.
         /// </summary>
-        private static readonly List<char> _unixTerminalCharacters = new List<char>
+        private static readonly char[] _unixTerminalCharacters = new char[6]
         {
             '\n',
             '|',
@@ -28,9 +28,9 @@ namespace BrowserInterface
         };
 
         /// <summary>
-        /// The list of characters which should be ignored for windows.
+        /// The array of characters which should be ignored for windows.
         /// </summary>
-        private static readonly List<char> _windowsTerminalCharacters = new List<char>
+        private static readonly char[] _windowsTerminalCharacters = new char[6]
         {
             '\n',
             '\r',
@@ -41,9 +41,9 @@ namespace BrowserInterface
         };
 
         /// <summary>
-        /// The list of characters which should be ignored for osx.
+        /// The array of characters which should be ignored for osx.
         /// </summary>
-        private static readonly List<char> _macTerminalCharacters = new List<char>
+        private static readonly char[] _macTerminalCharacters = new char[5]
         {
             '\n',
             '&',
@@ -117,7 +117,7 @@ namespace BrowserInterface
         /// <param name="queryParams">The (optional) query parameters that will be sanitized.</param>
         /// <returns>A <see cref="ValueTuple{string, Dictionary{string, string}}"/> which contains the sanitized url and query parameters.</returns>
         /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization.</exception>
-        private static (string, Dictionary<string, string>) SanitizeInput(List<char> forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
+        private static (string, Dictionary<string, string>) SanitizeInput(char[] forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
         {
             string urlOut = url.Filter(forbiddenCharacters);
 
@@ -176,7 +176,7 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(List{char}, string, Dictionary{string, object}?)"/>.</exception>
+        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
         private void OpenUrlMac(string url, Dictionary<string, object>? queryParams = null)
         {
             (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_macTerminalCharacters, url, queryParams);
@@ -190,7 +190,7 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(List{char}, string, Dictionary{string, object}?)"/>.</exception>
+        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
         private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null)
         {
             (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_unixTerminalCharacters, url, queryParams);
@@ -204,7 +204,7 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">The url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(List{char}, string, Dictionary{string, object}?)"/>.</exception>
+        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
 
         private void OpenUrlWindows(string url, Dictionary<string, object>? queryParams = null)
         {
