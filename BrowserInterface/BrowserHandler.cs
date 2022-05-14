@@ -7,8 +7,9 @@ using System.Text;
 namespace BrowserInterface
 {
     /// <summary>
-    /// A simple class, which simplifies opening a GET URL in the browser of the user, optionally with query parameters. <br/>
-    /// For (hopefully) obvious reasons, POST is not supported.
+    /// A simple class, which simplifies opening a <see cref="HttpMethod.Get"/> URL in the browser of the user, optionally with query parameters. <br/>
+    /// For (hopefully) obvious reasons, <see cref="HttpMethod.Post"/> is not supported. <br/>
+    /// It is encouraged to use the browserhandler as service, or inside a <see langword="using"/> statement, so no memory leaks occur, however small.
     /// </summary>
     [DebuggerDisplay($"{{{nameof(ToString)}(),nq}}")]
     public sealed class BrowserHandler : IDisposable
@@ -110,11 +111,11 @@ namespace BrowserInterface
         /// <summary>
         /// Sanitizes the input url and query parameters, to circumvent possible security holes.
         /// </summary>
-        /// <param name="forbiddenSubStrings"></param>
-        /// <param name="url"></param>
-        /// <param name="queryParams"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <param name="forbiddenCharacters">The characters that are not allowed in the url or the query parameter's string repsentation.</param>
+        /// <param name="url">The url that will be sanitized.</param>
+        /// <param name="queryParams">The (optional) query parameters that will be sanitized.</param>
+        /// <returns>A <see cref="ValueTuple{string, Dictionary{string, string}}"/> which contains the sanitized url and query parameters.</returns>
+        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization.</exception>
         private static (string, Dictionary<string, string>) SanitizeInput(List<char> forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
         {
             string urlOut = url.Filter(forbiddenCharacters);
@@ -174,6 +175,7 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
+        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(List{char}, string, Dictionary{string, object}?)"/>.</exception>
         private void OpenUrlMac(string url, Dictionary<string, object>? queryParams = null)
         {
             (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_macTerminalCharacters, url, queryParams);
@@ -187,6 +189,7 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
+        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(List{char}, string, Dictionary{string, object}?)"/>.</exception>
         private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null)
         {
             (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_unixTerminalCharacters, url, queryParams);
@@ -200,6 +203,8 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">The url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
+        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(List{char}, string, Dictionary{string, object}?)"/>.</exception>
+
         private void OpenUrlWindows(string url, Dictionary<string, object>? queryParams = null)
         {
             (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(_windowsTerminalCharacters, url, queryParams);
@@ -207,6 +212,10 @@ namespace BrowserInterface
             this.OpenUrlRaw("cmd", "start", url, "^&", sanitizedParams);
         }
 
+        /// <summary>
+        /// Disposes the <see cref="_process"/>, and removes contents of the <see cref="_stringBuilder"/>.
+        /// </summary>
+        /// <param name="disposing"><see langword="true"/> if this <see cref="BrowserHandler"/> is disposing.</param>
         private void Dispose(bool disposing)
         {
             if (!this._disposed)
