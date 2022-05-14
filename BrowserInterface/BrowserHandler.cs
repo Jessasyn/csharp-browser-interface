@@ -117,25 +117,16 @@ namespace BrowserInterface
         /// <exception cref="InvalidOperationException"></exception>
         private static (string, Dictionary<string, string>) SanitizeInput(List<char> forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
         {
-            string urlOut = url;
-
-            urlOut = new string(urlOut.Where(c => !forbiddenCharacters.Contains(c)).ToArray());
+            string urlOut = url.Filter(forbiddenCharacters);
 
             Dictionary<string, string> paramOut = new Dictionary<string, string> { };
 
-            if (queryParams is Dictionary<string, object> { Count: > 0 } @params)
+            if (queryParams is Dictionary<string, object> { Count: > 0 } @params && 
+                @params.Select(kvp => paramOut.TryAdd(kvp.Key.Filter(forbiddenCharacters), 
+                                                      kvp.Value.ToString().Filter(forbiddenCharacters)))
+                       .Any(k => !k))
             {
-                foreach (KeyValuePair<string, object> kvp in @params)
-                {
-                    string key = new string(kvp.Key.Where(c => !forbiddenCharacters.Contains(c)).ToArray());
-
-                    string valueString = new string(kvp.Value.ToString()?.Where(c => !forbiddenCharacters.Contains(c)).ToArray());
-
-                    if (!paramOut.TryAdd(key, valueString))
-                    {
-                        throw new InvalidOperationException($"Coalescing [{queryParams}] resulted in key colission!");
-                    }
-                }
+                throw new InvalidOperationException($"Coalescing [{queryParams}] resulted in key colission!");
             }
 
             return (urlOut, paramOut);
@@ -238,8 +229,6 @@ namespace BrowserInterface
 
         public sealed override string ToString() => $"{this._process.ProcessName}-{this._stringBuilder.Length}-{this._disposed}";
 
-        public  sealed override int GetHashCode() => HashCode.Combine(this._process,
-                                                                     this._stringBuilder,
-                                                                     this._disposed);
+        public sealed override int GetHashCode() => HashCode.Combine(this._process, this._stringBuilder, this._disposed);
     }
 }
