@@ -15,7 +15,7 @@ namespace BrowserInterface
     public sealed class BrowserHandler : IDisposable
     {
         /// <summary>
-        /// The array of characters which should be ignored for unix.
+        /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for unix.
         /// </summary>
         private static readonly char[] _unixTerminalCharacters = new char[6]
         {
@@ -28,7 +28,7 @@ namespace BrowserInterface
         };
 
         /// <summary>
-        /// The array of characters which should be ignored for windows.
+        /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for windows.
         /// </summary>
         private static readonly char[] _windowsTerminalCharacters = new char[6]
         {
@@ -41,7 +41,7 @@ namespace BrowserInterface
         };
 
         /// <summary>
-        /// The array of characters which should be ignored for osx.
+        /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for osx.
         /// </summary>
         private static readonly char[] _macTerminalCharacters = new char[5]
         {
