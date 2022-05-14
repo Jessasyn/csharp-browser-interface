@@ -93,7 +93,6 @@ namespace BrowserInterface
         /// <param name="queryParams"></param>
         public void OpenUrl(string url, Dictionary<string, object>? queryParams = null)
         {
-
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 this.OpenUrlWindows(url, queryParams);
@@ -118,11 +117,11 @@ namespace BrowserInterface
         /// <exception cref="InvalidOperationException"></exception>
         private static (string, Dictionary<string, string>) SanitizeInput(List<char> forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
         {
-            Dictionary<string, string> paramOut = new Dictionary<string, string> { };
-
             string urlOut = url;
 
             urlOut = new string(urlOut.Where(c => !forbiddenCharacters.Contains(c)).ToArray());
+
+            Dictionary<string, string> paramOut = new Dictionary<string, string> { };
 
             if (queryParams is Dictionary<string, object> { Count: > 0 } @params)
             {
