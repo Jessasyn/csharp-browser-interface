@@ -91,8 +91,9 @@ namespace BrowserInterface
         /// This method works on mac, unix and windows.
         /// Elements in the <paramref name="queryParams"/> dictionary will be converted to their string representation, but are <see cref="object"/> to allow for more concise method calls.
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="queryParams"></param>
+        /// <param name="url">The url to open.</param>
+        /// <param name="queryParams">The query parameters to append to the url.</param>
+        /// <exception cref="PlatformNotSupportedException">If the platform is not unix, windows or mac.</exception>
         public void OpenUrl(string url, Dictionary<string, object>? queryParams = null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -106,6 +107,10 @@ namespace BrowserInterface
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 this.OpenUrlMac(url, queryParams);
+            }
+            else
+            {
+                throw new PlatformNotSupportedException($"{nameof(BrowserHandler)} does not support opening urls for {RuntimeInformation.OSDescription}!");
             }
         }
 
