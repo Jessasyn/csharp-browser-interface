@@ -11,14 +11,10 @@
         /// <param name="string">The <see cref="string"/> that will be filtered. Can be <see langword="null"/>.</param>
         /// <param name="toRemove">The array of <see cref="char"/> that will be removed from the <paramref name="string"/>.</param>
         /// <returns>The filtered <paramref name="string"/>, or <see cref="string.Empty"/>, if the input was <see langword="null"/>.</returns>
-        public static string Filter(this string? @string, char[] toRemove)
+        public static string Filter(this string? @string, char[] toRemove) => @string switch
         {
-            if (@string is null)
-            {
-                return string.Empty;
-            }
-
-            return new string(@string.Where(x => !toRemove.Contains(x)).ToArray());
-        }
+            null => string.Empty,
+            _ => new string(@string.Where(x => !toRemove.Contains(x)).ToArray())
+        };
     }
 }
