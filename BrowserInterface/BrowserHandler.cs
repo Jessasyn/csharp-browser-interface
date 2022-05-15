@@ -1,6 +1,6 @@
 ﻿#region GenericNameSpaces
-using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 #endregion GenericNameSpaces
 
@@ -17,7 +17,7 @@ namespace BrowserInterface
         /// <summary>
         /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for unix.
         /// </summary>
-        private static readonly char[] _unixTerminalCharacters = new char[6]
+        private static readonly char[] _unixChars = new char[6]
         {
             '\n',
             '|',
@@ -30,7 +30,7 @@ namespace BrowserInterface
         /// <summary>
         /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for windows.
         /// </summary>
-        private static readonly char[] _windowsTerminalCharacters = new char[6]
+        private static readonly char[] _winChars = new char[6]
         {
             '\n',
             '\r',
@@ -43,7 +43,7 @@ namespace BrowserInterface
         /// <summary>
         /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for osx.
         /// </summary>
-        private static readonly char[] _macTerminalCharacters = new char[5]
+        private static readonly char[] _macChars = new char[5]
         {
             '\n',
             '&',
@@ -184,10 +184,7 @@ namespace BrowserInterface
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
         /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
-        private void OpenUrlMac(string url, Dictionary<string, object>? queryParams = null)
-        {
-            this.OpenUrlRaw("bash", "open", url, "\\&", _macTerminalCharacters, queryParams);
-        }
+        private void OpenUrlMac(string url, Dictionary<string, object>? queryParams = null) => this.OpenUrlRaw("bash", "open", url, "\\&", _macChars, queryParams);
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
@@ -196,10 +193,7 @@ namespace BrowserInterface
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
         /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
-        private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null)
-        {
-            this.OpenUrlRaw("bash", "xdg-open", url, "\\&", _unixTerminalCharacters, queryParams);
-        }
+        private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null) => this.OpenUrlRaw("bash", "xdg-open", url, "\\&", _unixChars, queryParams);
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
@@ -209,10 +203,7 @@ namespace BrowserInterface
         /// <param name="queryParams">The query parameters to append.</param>
         /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
 
-        private void OpenUrlWindows(string url, Dictionary<string, object>? queryParams = null)
-        {
-            this.OpenUrlRaw("cmd", "start", url, "^&", _windowsTerminalCharacters, queryParams);
-        }
+        private void OpenUrlWindows(string url, Dictionary<string, object>? queryParams = null) => this.OpenUrlRaw("cmd", "start", url, "^&", _winChars, queryParams);
 
         /// <summary>
         /// Disposes the <see cref="_process"/>, and removes contents of the <see cref="_stringBuilder"/>.
