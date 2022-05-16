@@ -1,6 +1,6 @@
 ﻿#region GenericNameSpaces
-using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 using System.Text;
 #endregion GenericNameSpaces
 
@@ -94,6 +94,7 @@ namespace BrowserInterface
         /// <param name="url">The url to open.</param>
         /// <param name="queryParams">The query parameters to append to the url.</param>
         /// <exception cref="PlatformNotSupportedException">If the platform is not unix, windows or mac.</exception>
+        /// <exception cref="FormatException">If the <paramref name="url"/> is not a http or https url.</exception>
         public void OpenUrl(string url, Dictionary<string, object>? queryParams = null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -122,9 +123,24 @@ namespace BrowserInterface
         /// <param name="queryParams">The (optional) query parameters that will be sanitized.</param>
         /// <returns>A <see cref="ValueTuple{string, Dictionary{string, string}}"/> which contains the sanitized url and query parameters.</returns>
         /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization.</exception>
+        /// <exception cref="FormatException">If the <paramref name="url"/> is not a http or https url.</exception>
         private static (string, Dictionary<string, string>) SanitizeInput(char[] forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
         {
             string urlOut = url.Filter(forbiddenCharacters);
+
+            try
+            {
+                Uri uri = new Uri(urlOut);
+
+                if (uri.Scheme is not "https" and not "http")
+                {
+                    throw new FormatException($"Expected http(s) url, got {uri.Scheme}!");
+                }
+            }
+            catch(FormatException ex)
+            {
+                throw new FormatException($"Malformed url: {ex}!");
+            }
 
             Dictionary<string, string> paramOut = new Dictionary<string, string> { };
 
@@ -183,7 +199,6 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
         private void OpenUrlMac(string url, Dictionary<string, object>? queryParams = null) => this.OpenUrlRaw("bash", "open", url, "\\&", _macChars, queryParams);
 
         /// <summary>
@@ -192,7 +207,6 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
         private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null) => this.OpenUrlRaw("bash", "xdg-open", url, "\\&", _unixChars, queryParams);
 
         /// <summary>
@@ -201,8 +215,6 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">The url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization in <see cref="SanitizeInput(Array{char}, string, Dictionary{string, object}?)"/>.</exception>
-
         private void OpenUrlWindows(string url, Dictionary<string, object>? queryParams = null) => this.OpenUrlRaw("cmd", "start", url, "^&", _winChars, queryParams);
 
         /// <summary>
