@@ -94,7 +94,7 @@ namespace BrowserInterface
         /// <param name="url">The url to open.</param>
         /// <param name="queryParams">The query parameters to append to the url.</param>
         /// <exception cref="PlatformNotSupportedException">If the platform is not unix, windows or mac.</exception>
-        /// <exception cref="FormatException">If the <paramref name="url"/> is not a http or https url.</exception>
+        /// <exception cref="FormatException">Thrown iff the <paramref name="url"/> is not a http or https url, or key parameter sanitization results in key colission.</exception>
         public void OpenUrl(string url, Dictionary<string, object>? queryParams = null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -122,8 +122,7 @@ namespace BrowserInterface
         /// <param name="url">The url that will be sanitized.</param>
         /// <param name="queryParams">The (optional) query parameters that will be sanitized.</param>
         /// <returns>A <see cref="ValueTuple{string, Dictionary{string, string}}"/> which contains the sanitized url and query parameters.</returns>
-        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization.</exception>
-        /// <exception cref="FormatException">If the <paramref name="url"/> is not a http or https url.</exception>
+        /// <exception cref="FormatException">Thrown iff the <paramref name="url"/> is not a http or https url, or key parameter sanitization results in key colission.</exception>
         private static (string, Dictionary<string, string>) SanitizeInput(char[] forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
         {
             string urlOut = url.Filter(forbiddenCharacters);
@@ -139,7 +138,7 @@ namespace BrowserInterface
             }
             catch(FormatException ex)
             {
-                throw new FormatException($"Malformed url: {ex}!");
+                throw new FormatException($"Malformed url: {ex.Message}!");
             }
 
             Dictionary<string, string> paramOut = new Dictionary<string, string> { };
@@ -149,7 +148,7 @@ namespace BrowserInterface
                                                       kvp.Value.ToString().Filter(forbiddenCharacters)))
                        .Any(k => !k))
             {
-                throw new InvalidOperationException($"Coalescing [{queryParams}] resulted in key colission!");
+                throw new FormatException($"Coalescing [{queryParams}] resulted in key colission!");
             }
 
             return (urlOut, paramOut);
