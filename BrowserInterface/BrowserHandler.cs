@@ -164,10 +164,10 @@ namespace BrowserInterface
         {
             (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(forbiddenCharacters, url, queryParams);
 
-            this._stringBuilder.Clear();
-            this._stringBuilder.Append(command);
-            this._stringBuilder.Append(' ');
-            this._stringBuilder.Append(url);
+            this._stringBuilder.Clear()
+                               .Append(command)
+                               .Append(' ')
+                               .Append(url);
 
             if (sanitizedParams.Count > 0)
             {
@@ -175,10 +175,10 @@ namespace BrowserInterface
 
                 foreach (KeyValuePair<string, string> kvp in sanitizedParams)
                 {
-                    this._stringBuilder.Append(kvp.Key);
-                    this._stringBuilder.Append('=');
-                    this._stringBuilder.Append(kvp.Value);
-                    this._stringBuilder.Append(paramSeparator);
+                    this._stringBuilder.Append(kvp.Key)
+                                       .Append('=')
+                                       .Append(kvp.Value)
+                                       .Append(paramSeparator);
                 }
 
                 this._stringBuilder.Length -= paramSeparator.Length;
