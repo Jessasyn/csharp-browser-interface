@@ -185,7 +185,7 @@ namespace BrowserInterface
             }
 
             this._process.StartInfo.FileName = shellName;
-            this._process.Start();
+            _ = this._process.Start();
             this._process.StandardInput.WriteLine(this._stringBuilder);
             this._process.StandardInput.Flush();
             this._process.StandardInput.Close();
@@ -229,7 +229,7 @@ namespace BrowserInterface
                     this._process.Dispose();
                 }
 
-                this._stringBuilder.Clear();
+                _ = this._stringBuilder.Clear();
                 this._disposed = true;
             }
         }
