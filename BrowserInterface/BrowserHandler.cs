@@ -28,6 +28,17 @@ namespace BrowserInterface
         };
 
         /// <summary>
+        /// The <see cref="Array"/> of <see cref="string"/> that are all terminals which should be checked for unix.
+        /// </summary>
+        private static readonly string[] _unixShellNames = new string[4]
+        {
+            "bash",
+            "sh",
+            "fish",
+            "zs"
+        };
+
+        /// <summary>
         /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for windows.
         /// </summary>
         private static readonly char[] _winChars = new char[6]
@@ -94,7 +105,7 @@ namespace BrowserInterface
         /// <param name="url">The url to open.</param>
         /// <param name="queryParams">The query parameters to append to the url.</param>
         /// <exception cref="PlatformNotSupportedException">If the platform is not unix, windows or mac.</exception>
-        /// <exception cref="FormatException">Thrown iff the <paramref name="url"/> is not a http or https url, or key parameter sanitization results in key colission.</exception>
+        /// <exception cref="FormatException">If the <paramref name="url"/> is not a http or https url.</exception>
         public void OpenUrl(string url, Dictionary<string, object>? queryParams = null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -122,7 +133,8 @@ namespace BrowserInterface
         /// <param name="url">The url that will be sanitized.</param>
         /// <param name="queryParams">The (optional) query parameters that will be sanitized.</param>
         /// <returns>A <see cref="ValueTuple{string, Dictionary{string, string}}"/> which contains the sanitized url and query parameters.</returns>
-        /// <exception cref="FormatException">Thrown iff the <paramref name="url"/> is not a http or https url, or key parameter sanitization results in key colission.</exception>
+        /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization.</exception>
+        /// <exception cref="FormatException">If the <paramref name="url"/> is not a http or https url.</exception>
         private static (string, Dictionary<string, string>) SanitizeInput(char[] forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
         {
             string urlOut = url.Filter(forbiddenCharacters);
@@ -133,10 +145,10 @@ namespace BrowserInterface
 
                 if (uri.Scheme is not "https" and not "http")
                 {
-                    throw new FormatException($"Expected http(s) url, got {uri.Scheme}!");
+                    throw new ArgumentException($"Expected http(s) url, got {uri.Scheme}!");
                 }
             }
-            catch(FormatException ex)
+            catch (FormatException ex)
             {
                 throw new FormatException($"Malformed url: {ex.Message}!");
             }
@@ -148,7 +160,7 @@ namespace BrowserInterface
                                                       kvp.Value.ToString().Filter(forbiddenCharacters)))
                        .Any(k => !k))
             {
-                throw new FormatException($"Coalescing [{queryParams}] resulted in key colission!");
+                throw new InvalidOperationException($"Coalescing [{queryParams}] resulted in key colission!");
             }
 
             return (urlOut, paramOut);
@@ -164,28 +176,28 @@ namespace BrowserInterface
         {
             (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(forbiddenCharacters, url, queryParams);
 
-            _ = this._stringBuilder.Clear()
-                                   .Append(command)
-                                   .Append(' ')
-                                   .Append(url);
+            this._stringBuilder.Clear();
+            this._stringBuilder.Append(command);
+            this._stringBuilder.Append(' ');
+            this._stringBuilder.Append(url);
 
             if (sanitizedParams.Count > 0)
             {
-                _ = this._stringBuilder.Append('?');
+                this._stringBuilder.Append('?');
 
                 foreach (KeyValuePair<string, string> kvp in sanitizedParams)
                 {
-                    _ = this._stringBuilder.Append(kvp.Key)
-                                           .Append('=')
-                                           .Append(kvp.Value)
-                                           .Append(paramSeparator);
+                    this._stringBuilder.Append(kvp.Key);
+                    this._stringBuilder.Append('=');
+                    this._stringBuilder.Append(kvp.Value);
+                    this._stringBuilder.Append(paramSeparator);
                 }
 
                 this._stringBuilder.Length -= paramSeparator.Length;
             }
 
             this._process.StartInfo.FileName = shellName;
-            _ = this._process.Start();
+            this._process.Start();
             this._process.StandardInput.WriteLine(this._stringBuilder);
             this._process.StandardInput.Flush();
             this._process.StandardInput.Close();
@@ -206,7 +218,19 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null) => this.OpenUrlRaw("bash", "xdg-open", url, "\\&", _unixChars, queryParams);
+        private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null)
+        {
+            string? shell = _unixShellNames.FirstOrDefault(s => File.Exists(s));
+
+            if (shell is string shellName)
+            {
+                this.OpenUrlRaw(shellName, "xdg-open", url, "\\&", _unixChars, queryParams);
+            }
+            else
+            {
+                throw new NotSupportedException($"No known shell exists, cannot open url!");
+            }
+        }
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
@@ -229,7 +253,7 @@ namespace BrowserInterface
                     this._process.Dispose();
                 }
 
-                _ = this._stringBuilder.Clear();
+                this._stringBuilder.Clear();
                 this._disposed = true;
             }
         }
