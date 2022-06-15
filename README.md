@@ -25,11 +25,11 @@ On some distributions, however, this file does not exist. If it does not, the li
 ## Why use a shell?
 Because of windows (and possibly mac as well).
 
-On linux, we can *probably*\* target binary executables directly (i.e. '/bin/xdg-open', the executable which is used to actually open the url), but on windows, the command 'start' is used. There is no executable called 'start' readily available (as in, trying to run 'start' does not work, nor does a find return it).
+On linux, we can target binary executables directly (i.e. '/bin/xdg-open', the executable which is used to actually open the url), but on windows, the command 'start' is used. There is no executable called 'start' readily available (as in, trying to run 'start' does not work, nor does a find return it).
 To avoid code duplication, and to keep everything as platform-agnostic as possible, we therefore open a shell, and run the appropriate command in it.
 This may or may not also be the case in OSX, I have not checked. It would not surprise me, though.
 
-\*: probably, because the behaviour of `UseShellExecute` is kind of strange, and has caused me a lot of headaches before I managed the first working version.
+I am currently looking into the possibilities of somehow importing the start function from whatever dll it is hidden in, and using it that way.
 
 ## Example usage:
 
