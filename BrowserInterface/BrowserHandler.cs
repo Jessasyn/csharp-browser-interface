@@ -78,6 +78,7 @@ namespace BrowserInterface
                 {
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                     CreateNoWindow = true,
                     UseShellExecute = false
                 }
@@ -217,17 +218,22 @@ namespace BrowserInterface
             this._process.StandardInput.Close();
             this._process.WaitForExit();
 
-            string? shellName = this._process.StandardOutput.ReadToEnd()
+            string? shellname = this._process.StandardOutput.ReadToEnd()
                                                             .Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
                                                             .FirstOrDefault(s => File.Exists(s));
 
-            if (shellName is not null)
+            if (shellname is string shellName)
             {
                 this.OpenUrlRaw(shellName, "xdg-open", url, "\\&", _unixChars, queryParams);
             }
+            else if (File.Exists("/bin/sh"))
+            {
+                Console.Error.WriteLine("Warning: could not find valid shell in '/etc/shells', defaulting to '/bin/sh'!");
+                this.OpenUrlRaw("/bin/sh", "xdg-open", url, "\\&", _unixChars, queryParams);
+            }
             else
             {
-                throw new NotSupportedException($"No known shell exists, cannot open url!");
+                throw new NotSupportedException("Error: no valid shell found in '/etc/shells', and default '/bin/sh' does not exist! Url cannot be opened on this device.");
             }
         }
 
