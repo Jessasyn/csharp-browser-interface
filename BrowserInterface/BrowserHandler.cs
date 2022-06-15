@@ -28,17 +28,6 @@ namespace BrowserInterface
         };
 
         /// <summary>
-        /// The <see cref="Array"/> of <see cref="string"/> that are all terminals which should be checked for unix.
-        /// </summary>
-        private static readonly string[] _unixShellNames = new string[4]
-        {
-            "bash",
-            "sh",
-            "fish",
-            "zs"
-        };
-
-        /// <summary>
         /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for windows.
         /// </summary>
         private static readonly char[] _winChars = new char[6]
@@ -220,9 +209,19 @@ namespace BrowserInterface
         /// <param name="queryParams">The query parameters to append.</param>
         private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null)
         {
-            string? shell = _unixShellNames.FirstOrDefault(s => File.Exists(s));
+            this._process.StartInfo.FileName = "cat";
+            this._process.StartInfo.ArgumentList.Clear();
+            this._process.StartInfo.ArgumentList.Add("/etc/shells");
+            this._process.Start();
+            this._process.StandardInput.Flush();
+            this._process.StandardInput.Close();
+            this._process.WaitForExit();
 
-            if (shell is string shellName)
+            string? shellName = this._process.StandardOutput.ReadToEnd()
+                                                            .Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                                                            .FirstOrDefault(s => File.Exists(s));
+
+            if (shellName is not null)
             {
                 this.OpenUrlRaw(shellName, "xdg-open", url, "\\&", _unixChars, queryParams);
             }
