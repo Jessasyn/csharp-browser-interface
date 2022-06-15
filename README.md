@@ -16,11 +16,11 @@ On any supported version of windows, which have the `ShellExecuteA` function in 
 As far as I am aware, this means all supported versions of windows.
 
 ### Mac
-On any supported version of mac which has the file '/usr/bin/open', this library will function.
+On any supported version of mac which has the file `/usr/bin/open`, this library will function.
 As far as I am aware, this means all supported versions of mac.
 
 ### Linux
-On any supported version of linux which has the file '/usr/bin/xdg-open', this library will function.
+On any supported version of linux which has the file `/usr/bin/xdg-open`, this library will function.
 As far as I am aware, this means all supported versions of linux.
 
 ## Example usage:
