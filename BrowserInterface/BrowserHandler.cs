@@ -87,7 +87,7 @@ namespace BrowserInterface
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                this.OpenUrlUnix(url);
+                this.OpenUrlMac(url);
             }
             else
             {
