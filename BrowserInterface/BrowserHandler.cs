@@ -99,15 +99,18 @@ namespace BrowserInterface
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                this.OpenUrlWindows(url, queryParams);
+                this.OpenUrlWindows(this.SanitizeInput(_winChars, url, "^&", queryParams));
+                //this.OpenUrlWindows(url, queryParams);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                this.OpenUrlUnix(url, queryParams);
+                this.OpenUrlUnix(this.SanitizeInput(Array.Empty<char>(), url, "\\&", queryParams));
+                //this.OpenUrlUnix(url, queryParams);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                this.OpenUrlMac(url, queryParams);
+                this.OpenUrlUnix(this.SanitizeInput(Array.Empty<char>(), url, "\\&", queryParams));
+                //this.OpenUrlMac(url, queryParams);
             }
             else
             {
@@ -124,7 +127,7 @@ namespace BrowserInterface
         /// <returns>A <see cref="ValueTuple{string, Dictionary{string, string}}"/> which contains the sanitized url and query parameters.</returns>
         /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization.</exception>
         /// <exception cref="FormatException">If the <paramref name="url"/> is not a http or https url.</exception>
-        private static (string, Dictionary<string, string>) SanitizeInput(char[] forbiddenCharacters, string url, Dictionary<string, object>? queryParams = null)
+        private string SanitizeInput(char[] forbiddenCharacters, string url, string paramSeparator, Dictionary<string, object>? queryParams = null)
         {
             string urlOut = url.Filter(forbiddenCharacters);
 
@@ -142,6 +145,9 @@ namespace BrowserInterface
                 throw new FormatException($"Malformed url: {ex.Message}!");
             }
 
+            this._stringBuilder.Clear();
+            this._stringBuilder.Append(urlOut);
+
             Dictionary<string, string> paramOut = new Dictionary<string, string> { };
 
             if (queryParams is Dictionary<string, object> { Count: > 0 } @params &&
@@ -152,29 +158,11 @@ namespace BrowserInterface
                 throw new InvalidOperationException($"Coalescing [{queryParams}] resulted in key colission!");
             }
 
-            return (urlOut, paramOut);
-        }
-
-        /// <summary>
-        /// Using the provided <paramref name="shellName"/>, executes <paramref name="command"/> to open a <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
-        /// This method is platform independant. <br/>
-        /// </summary>
-        /// <param name="url">THe url to open.</param>
-        /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlRaw(string shellName, string command, string url, string paramSeparator, char[] forbiddenCharacters, Dictionary<string, object>? queryParams = null)
-        {
-            (url, Dictionary<string, string> sanitizedParams) = SanitizeInput(forbiddenCharacters, url, queryParams);
-
-            this._stringBuilder.Clear();
-            this._stringBuilder.Append(command);
-            this._stringBuilder.Append(' ');
-            this._stringBuilder.Append(url);
-
-            if (sanitizedParams.Count > 0)
+            if (paramOut.Count > 0)
             {
                 this._stringBuilder.Append('?');
 
-                foreach (KeyValuePair<string, string> kvp in sanitizedParams)
+                foreach (KeyValuePair<string, string> kvp in paramOut)
                 {
                     this._stringBuilder.Append(kvp.Key);
                     this._stringBuilder.Append('=');
@@ -184,6 +172,22 @@ namespace BrowserInterface
 
                 this._stringBuilder.Length -= paramSeparator.Length;
             }
+
+            return this._stringBuilder.ToString();
+        }
+
+        /// <summary>
+        /// Using the provided <paramref name="shellName"/>, executes <paramref name="command"/> to open a <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
+        /// This method is platform independant. <br/>
+        /// </summary>
+        /// <param name="url">THe url to open.</param>
+        /// <param name="queryParams">The query parameters to append.</param>
+        private void OpenUrlRaw(string shellName, string command, string url)
+        {
+            this._stringBuilder.Clear();
+            this._stringBuilder.Append(command);
+            this._stringBuilder.Append(' ');
+            this._stringBuilder.Append(url);
 
             this._process.StartInfo.FileName = shellName;
             this._process.Start();
@@ -199,7 +203,7 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlMac(string url, Dictionary<string, object>? queryParams = null) => this.OpenUrlRaw("bash", "open", url, "\\&", _macChars, queryParams);
+        private void OpenUrlMac(string url) => this.OpenUrlRaw("bash", "open", url);
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
@@ -207,7 +211,7 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlUnix(string url, Dictionary<string, object>? queryParams = null)
+        private void OpenUrlUnix(string url)
         {
             this._process.StartInfo.FileName = "cat";
             this._process.StartInfo.ArgumentList.Clear();
@@ -223,12 +227,12 @@ namespace BrowserInterface
 
             if (shellname is string shellName)
             {
-                this.OpenUrlRaw(shellName, "xdg-open", url, "\\&", _unixChars, queryParams);
+                this.OpenUrlRaw(shellName, "xdg-open", url);
             }
             else if (File.Exists("/bin/sh"))
             {
                 Console.Error.WriteLine("Warning: could not find valid shell in '/etc/shells', defaulting to '/bin/sh'!");
-                this.OpenUrlRaw("/bin/sh", "xdg-open", url, "\\&", _unixChars, queryParams);
+                this.OpenUrlRaw("/bin/sh", "xdg-open", url);
             }
             else
             {
@@ -242,7 +246,7 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="url">The url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlWindows(string url, Dictionary<string, object>? queryParams = null) => this.OpenUrlRaw("cmd", "start", url, "^&", _winChars, queryParams);
+        private void OpenUrlWindows(string url) => this.OpenUrlRaw("cmd", "start", url);
 
         /// <summary>
         /// Disposes the <see cref="_process"/>, and removes contents of the <see cref="_stringBuilder"/>.

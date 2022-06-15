@@ -14,6 +14,7 @@
         public static string Filter(this string? @string, char[] toRemove) => @string switch
         {
             null => string.Empty,
+            string s when !toRemove.Any() => s,
             _ => new string(@string.Where(x => !toRemove.Contains(x)).ToArray())
         };
     }
