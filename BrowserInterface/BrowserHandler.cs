@@ -78,7 +78,6 @@ namespace BrowserInterface
                 {
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
-                    RedirectStandardError = true,
                     CreateNoWindow = true,
                     UseShellExecute = false
                 }
