@@ -100,17 +100,14 @@ namespace BrowserInterface
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 this.OpenUrlWindows(this.SanitizeInput(_winChars, url, "^&", queryParams));
-                //this.OpenUrlWindows(url, queryParams);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 this.OpenUrlUnix(this.SanitizeInput(Array.Empty<char>(), url, "\\&", queryParams));
-                //this.OpenUrlUnix(url, queryParams);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 this.OpenUrlUnix(this.SanitizeInput(Array.Empty<char>(), url, "\\&", queryParams));
-                //this.OpenUrlMac(url, queryParams);
             }
             else
             {
