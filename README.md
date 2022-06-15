@@ -5,7 +5,7 @@ Specifically, to open a url (optionally, with query parameters), on the *default
 To do this, it uses functionality exposed by System.Diagnostics.Process to start a process, running in the background, which targets some specific command that opens a browser. 
 This command is platform-specific.
 
-Input sanitation exists; characters which are used in the shell of the corresponding system the program is running on will be removed. In addition, because the commands used to open the browser accept *any* URI, a check is present which forces the scheme of the URI to be either HTTP or HTTPS. Still, it might be possible to obtain shell access, given the right input, so *never* allow input from the user to directly reach the `OpenUrl` call.
+Input sanitation exists; on windows, a shell is opened, and characters that have special meaning within this shell are filtered out. Though this should prevent malicious input, please *never* allow user input to reach the `OpenUrl` function directly.
 
 Also, do note that you will only need this library if you really need to open a browser tab for the user. To perform a normal GET request, simply use the HttpClient implementation of C# itself.
 
@@ -15,21 +15,17 @@ Also, do note that you will only need this library if you really need to open a 
 On any supported version of windows, this library will fuction.
 
 ### Mac
-On any supported version of mac, this library will function. 
-This is of course assuming that mac does not eventually disallow the use of 3rd party software completely.
+On any supported version of mac which has the file '/usr/bin/open', this library will function.
+As far as I am aware, this means all supported versions of mac.
 
 ### Linux
-The available shells on a given linux distribution will differ. Therefore, the library attempts to read out the contents of '/etc/shells' to obtain a list of all available shells on the distribution.
-On some distributions, however, this file does not exist. If it does not, the library will fall back to '/bin/sh'. This means that if a distribution does not have the '/etc/shells' file *and* it does not have '/bin/sh' as shell, the library will **not** function.
+On any supported version of linux which has the file '/usr/bin/xdg-open', this library will function.
+As far as I am aware this means all supported versions of linux.
 
-## Why use a shell?
-Because of windows (and possibly mac as well).
+## What is happening with windows?
+Windows is a bit special. With Linux and Mac, we can just target some binary file directly ('xdg-open' and 'open', respectively). With Windows, that is not possible. The 'start' command is hidden somewhere within a dll file, and so the easiest way to access it is to open a terminal, and just 'type' the start command followed by the requested url.
 
-On linux, we can target binary executables directly (i.e. '/bin/xdg-open', the executable which is used to actually open the url), but on windows, the command 'start' is used. There is no executable called 'start' readily available (as in, trying to run 'start' does not work, nor does a find return it).
-To avoid code duplication, and to keep everything as platform-agnostic as possible, we therefore open a shell, and run the appropriate command in it.
-This may or may not also be the case in OSX, I have not checked. It would not surprise me, though.
-
-I am currently looking into the possibilities of somehow importing the start function from whatever dll it is hidden in, and using it that way.
+In the future, I will be looking at the possibility of importing this function through `DllImport`.
 
 ## Example usage:
 
