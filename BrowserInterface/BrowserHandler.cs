@@ -24,7 +24,7 @@ namespace BrowserInterface
         /// <param name="lpParameters">If lpFile specifies an executable file, this parameter is a pointer to a null-terminated string that specifies the parameters to be passed to the application. The format of this string is determined by the verb that is to be invoked. If lpFile specifies a document file, lpParameters should be NULL.</param>
         /// <param name="lpDirectory">A pointer to a null-terminated string that specifies the default (working) directory for the action. If this value is NULL, the current working directory is used. If a relative path is provided at lpFile, do not use a relative path for lpDirectory.</param>
         /// <param name="nShowCmd">The flags that specify how an application is to be displayed when it is opened. If lpFile specifies a document file, the flag is simply passed to the associated application. It is up to the application to decide how to handle it. It can be any of the values that can be specified in the nCmdShow parameter for the ShowWindow function.</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="long"/>, indicating success if the value is greater than 32.</returns>
         [DllImport("Shell32.dll", BestFitMapping = true, CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
         private static extern long ShellExecute(int hWnd, string? lpOperation, string lpFile, string? lpParameters, string? lpDirectory, long nShowCmd);
 
