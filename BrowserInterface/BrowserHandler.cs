@@ -153,6 +153,7 @@ namespace BrowserInterface
         private void OpenUrlRaw(string command, string url)
         {
             this._process.StartInfo.FileName = command;
+            this._process.StartInfo.ArgumentList.Clear();
             this._process.StartInfo.ArgumentList.Add(url);
             this._process.Start();
             this._process.WaitForExit();
