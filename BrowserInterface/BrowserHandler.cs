@@ -15,19 +15,6 @@ namespace BrowserInterface
     public sealed class BrowserHandler : IDisposable
     {
         /// <summary>
-        /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for unix.
-        /// </summary>
-        private static readonly char[] _unixChars = new char[6]
-        {
-            '\n',
-            '|',
-            '&',
-            '\r',
-            '\\',
-            ';'
-        };
-
-        /// <summary>
         /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for windows.
         /// </summary>
         private static readonly char[] _winChars = new char[6]
@@ -36,18 +23,6 @@ namespace BrowserInterface
             '\r',
             '&',
             '^',
-            '\\',
-            ';'
-        };
-
-        /// <summary>
-        /// The <see cref="Array"/> of <see cref="char"/> which should be ignored for osx.
-        /// </summary>
-        private static readonly char[] _macChars = new char[5]
-        {
-            '\n',
-            '&',
-            '|',
             '\\',
             ';'
         };
@@ -103,11 +78,11 @@ namespace BrowserInterface
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                this.OpenUrlUnix(this.SanitizeInput(Array.Empty<char>(), url, "\\&", queryParams));
+                this.OpenUrlUnix(this.SanitizeInput(Array.Empty<char>(), url, "&", queryParams));
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                this.OpenUrlUnix(this.SanitizeInput(Array.Empty<char>(), url, "\\&", queryParams));
+                this.OpenUrlUnix(this.SanitizeInput(Array.Empty<char>(), url, "&", queryParams));
             }
             else
             {
@@ -121,7 +96,7 @@ namespace BrowserInterface
         /// <param name="forbiddenCharacters">The characters that are not allowed in the url or the query parameter's string repsentation.</param>
         /// <param name="url">The url that will be sanitized.</param>
         /// <param name="queryParams">The (optional) query parameters that will be sanitized.</param>
-        /// <returns>A <see cref="ValueTuple{string, Dictionary{string, string}}"/> which contains the sanitized url and query parameters.</returns>
+        /// <returns>A <see cref="string"/> which contains the sanitized url and optionally appended query parameters.</returns>
         /// <exception cref="InvalidOperationException">Thrown iff key colission occurs during key parameter sanitization.</exception>
         /// <exception cref="FormatException">If the <paramref name="url"/> is not a http or https url.</exception>
         private string SanitizeInput(char[] forbiddenCharacters, string url, string paramSeparator, Dictionary<string, object>? queryParams = null)
@@ -144,6 +119,10 @@ namespace BrowserInterface
 
             this._stringBuilder.Clear();
             this._stringBuilder.Append(urlOut);
+
+            // Note: once dll importing is used on windows, sanitization can be removed entirely.
+            // Coalescing should still be done, which might still provide an InvalidOperationException.
+            // Allowing object is useful, because it makes for more concise function calls (with string builders, or streams, for instance).
 
             Dictionary<string, string> paramOut = new Dictionary<string, string> { };
 
@@ -174,76 +153,48 @@ namespace BrowserInterface
         }
 
         /// <summary>
-        /// Using the provided <paramref name="shellName"/>, executes <paramref name="command"/> to open a <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
+        /// Executes <paramref name="command"/> to open a <paramref name="url"/>, in the default web browser of the user. <br/>
         /// This method is platform independant. <br/>
         /// </summary>
-        /// <param name="url">THe url to open.</param>
-        /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlRaw(string shellName, string command, string url)
+        /// <param name="url">The url to open.</param>
+        private void OpenUrlRaw(string command, string url)
         {
-            this._stringBuilder.Clear();
-            this._stringBuilder.Append(command);
-            this._stringBuilder.Append(' ');
-            this._stringBuilder.Append(url);
-
-            this._process.StartInfo.FileName = shellName;
+            this._process.StartInfo.FileName = command;
+            this._process.StartInfo.ArgumentList.Add(url);
             this._process.Start();
-            this._process.StandardInput.WriteLine(this._stringBuilder);
-            this._process.StandardInput.Flush();
-            this._process.StandardInput.Close();
             this._process.WaitForExit();
         }
 
         /// <summary>
-        /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
+        /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
         /// This method only functions on mac.
         /// </summary>
         /// <param name="url">THe url to open.</param>
-        /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlMac(string url) => this.OpenUrlRaw("bash", "open", url);
+        private void OpenUrlMac(string url) => this.OpenUrlRaw("open", url);
 
         /// <summary>
-        /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
+        /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
         /// This method only functions on unix.
         /// </summary>
         /// <param name="url">THe url to open.</param>
         /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlUnix(string url)
-        {
-            this._process.StartInfo.FileName = "cat";
-            this._process.StartInfo.ArgumentList.Clear();
-            this._process.StartInfo.ArgumentList.Add("/etc/shells");
-            this._process.Start();
-            this._process.StandardInput.Flush();
-            this._process.StandardInput.Close();
-            this._process.WaitForExit();
-
-            string? shellname = this._process.StandardOutput.ReadToEnd()
-                                                            .Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                                                            .FirstOrDefault(s => File.Exists(s));
-
-            if (shellname is string shellName)
-            {
-                this.OpenUrlRaw(shellName, "xdg-open", url);
-            }
-            else if (File.Exists("/bin/sh"))
-            {
-                Console.Error.WriteLine("Warning: could not find valid shell in '/etc/shells', defaulting to '/bin/sh'!");
-                this.OpenUrlRaw("/bin/sh", "xdg-open", url);
-            }
-            else
-            {
-                throw new NotSupportedException("Error: no valid shell found in '/etc/shells', and default '/bin/sh' does not exist! Url cannot be opened on this device.");
-            }
-        }
+        private void OpenUrlUnix(string url) => this.OpenUrlRaw("xdg-open", url);
 
         /// <summary>
-        /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, with the provided <paramref name="queryParams"/>, in the default web browser of the user. <br/>
+        /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
+        /// It does this by opening a shell, and then executing the 'start' command in it, followed by the url.
         /// This method only functions on windows.
         /// </summary>
         /// <param name="url">The url to open.</param>
-        /// <param name="queryParams">The query parameters to append.</param>
-        private void OpenUrlWindows(string url) => this.OpenUrlRaw("cmd", "start", url);
+        private void OpenUrlWindows(string url)
+        {
+            this._process.StartInfo.FileName = "cmd";
+            this._process.Start();
+            this._process.StandardInput.WriteLine($"start {url}");
+            this._process.StandardInput.Flush();
+            this._process.StandardInput.Close();
+            this._process.WaitForExit();
+        }
 
         /// <summary>
         /// Disposes the <see cref="_process"/>, and removes contents of the <see cref="_stringBuilder"/>.
