@@ -163,15 +163,14 @@ namespace BrowserInterface
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
         /// This method only functions on mac.
         /// </summary>
-        /// <param name="url">THe url to open.</param>
+        /// <param name="url">The url to open.</param>
         private void OpenUrlMac(string url) => this.OpenUrlRaw("open", url);
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
         /// This method only functions on unix.
         /// </summary>
-        /// <param name="url">THe url to open.</param>
-        /// <param name="queryParams">The query parameters to append.</param>
+        /// <param name="url">The url to open.</param>
         private void OpenUrlUnix(string url) => this.OpenUrlRaw("xdg-open", url);
 
         /// <summary>
