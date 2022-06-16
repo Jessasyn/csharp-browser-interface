@@ -65,7 +65,7 @@ namespace BrowserInterface
         /// <summary>
         /// Opens the <paramref name="urlBase"/> in the default browser of the user, with the provided <paramref name="queryParams"/>. <br/>
         /// This method works on mac, unix and windows.
-        /// Keys in the <paramref name="queryParams"/> dictionary will be converted to their string representation, but are <see cref="object"/> to allow for more concise method calls.
+        /// Keys and values in the <paramref name="queryParams"/> dictionary will be converted to their string representation, but are <see cref="object"/> to allow for more concise method calls.
         /// </summary>
         /// <param name="urlBase">The url to open.</param>
         /// <param name="queryParams">The query parameters to append to the url.</param>
@@ -73,7 +73,7 @@ namespace BrowserInterface
         /// <exception cref="ArgumentException">If the <paramref name="urlBase"/> is not a http or https url.</exception>
         /// <exception cref="FormatException"> If the <paramref name="urlBase"/> is not a valid <see cref="Uri"/>. </exception>
         /// <exception cref="InvalidOperationException"> If the <paramref name="queryParams"/> contain duplicate keys after coalescing. </exception>
-        public void OpenUrl(string urlBase, Dictionary<string, object>? queryParams = null)
+        public void OpenUrl(string urlBase, Dictionary<object, object>? queryParams = null)
         {
             string url = this.FormUrl(urlBase, queryParams);
 
@@ -104,7 +104,7 @@ namespace BrowserInterface
         /// <exception cref="ArgumentException">If the <paramref name="urlBase"/> is not a http or https url.</exception>
         /// <exception cref="FormatException"> If the <paramref name="urlBase"/> is not a valid <see cref="Uri"/>. </exception>
         /// <exception cref="InvalidOperationException"> If the <paramref name="queryParams"/> contain duplicate keys after coalescing. </exception>
-        private string FormUrl(string urlBase, Dictionary<string, object>? queryParams = null)
+        private string FormUrl(string urlBase, Dictionary<object, object>? queryParams = null)
         {
             try
             {
@@ -123,7 +123,7 @@ namespace BrowserInterface
             this._stringBuilder.Clear();
             this._stringBuilder.Append(urlBase);
 
-            if (queryParams is Dictionary<string, object> { Count: > 0 } @params)
+            if (queryParams is Dictionary<object, object> { Count: > 0 } @params)
             {
                 if (@params.Keys.GroupBy(k => k).Any(c => c.Count() > 1))
                 {
@@ -131,7 +131,7 @@ namespace BrowserInterface
                 }
                 this._stringBuilder.Append('?');
 
-                foreach (KeyValuePair<string, object> kvp in @params)
+                foreach (KeyValuePair<object, object> kvp in @params)
                 {
                     this._stringBuilder.Append(kvp.Key);
                     this._stringBuilder.Append('=');
