@@ -212,8 +212,6 @@ namespace BrowserInterface
             GC.SuppressFinalize(this);
         }
 
-        public sealed override string ToString() => $"{this._process.ProcessName}-{this._stringBuilder.Length}-{this._disposed}";
-
         public sealed override int GetHashCode() => HashCode.Combine(this._process, this._stringBuilder, this._disposed);
     }
 }
