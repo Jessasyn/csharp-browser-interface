@@ -180,9 +180,11 @@ namespace BrowserInterface
         /// <param name="url">The url to open.</param>
         private static void OpenUrlWindows(string url)
         {
-            if (ShellExecute(0, null, url, null, null, 1) < 32)
+            long res = ShellExecute(0, null, url, null, null, 1);
+
+            if (res < 32)
             {
-                Console.Error.WriteLine($"Warning: opening {url} failed with exit code {ShellExecute(0, null, url, null, null, 1)}!");
+                Console.Error.WriteLine($"Warning: opening {url} failed with exit code {res}!");
             }
         }
 
