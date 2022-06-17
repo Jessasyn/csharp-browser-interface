@@ -120,8 +120,8 @@ namespace BrowserInterface
                 throw new FormatException($"Malformed url: {ex.Message}!");
             }
 
-            this._stringBuilder.Clear();
-            this._stringBuilder.Append(urlBase);
+            this._stringBuilder.Clear()
+                               .Append(urlBase);
 
             if (queryParams is Dictionary<object, object> { Count: > 0 } @params)
             {
@@ -129,14 +129,15 @@ namespace BrowserInterface
                 {
                     throw new InvalidOperationException($"Coalescing [{queryParams}] resulted in key colission!");
                 }
+
                 this._stringBuilder.Append('?');
 
                 foreach (KeyValuePair<object, object> kvp in @params)
                 {
-                    this._stringBuilder.Append(kvp.Key);
-                    this._stringBuilder.Append('=');
-                    this._stringBuilder.Append(kvp.Value);
-                    this._stringBuilder.Append('&');
+                    this._stringBuilder.Append(kvp.Key)
+                                       .Append('=')
+                                       .Append(kvp.Value)
+                                       .Append('&');
                 }
 
                 this._stringBuilder.Length -= 1;
