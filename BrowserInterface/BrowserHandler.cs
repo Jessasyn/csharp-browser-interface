@@ -52,8 +52,6 @@ namespace BrowserInterface
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
                     CreateNoWindow = true,
                     UseShellExecute = false
                 }
