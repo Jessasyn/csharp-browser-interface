@@ -94,9 +94,9 @@ namespace BrowserInterface
         }
 
         /// <summary>
-        /// Forms a url out of a <paramref name="urlBase"/>, an optional collection of <paramref name="queryParams"/> and a <paramref name="paramSeparator"/>.
+        /// Forms a url out of a <paramref name="urlBase"/> and an optional collection of <paramref name="queryParams"/>.
         /// </summary>
-        /// <param name="urlBase">The base of the url..</param>
+        /// <param name="urlBase">The base of the url.</param>
         /// <param name="queryParams">The (optional) query parameters that will be sanitized.</param>
         /// <returns>A <see cref="string"/> which contains the sanitized url and optionally appended query parameters.</returns>
         /// <exception cref="ArgumentException">If the <paramref name="urlBase"/> is not a http or https url.</exception>
