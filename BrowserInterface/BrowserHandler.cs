@@ -146,7 +146,7 @@ namespace BrowserInterface
 
         /// <summary>
         /// Executes <paramref name="command"/> to open a <paramref name="url"/>, in the default web browser of the user. <br/>
-        /// This method is platform independant. <br/>
+        /// This method works on *NIX. <br/>
         /// </summary>
         /// <param name="url">The url to open.</param>
         private void OpenUrlRaw(string command, string url)
@@ -160,22 +160,21 @@ namespace BrowserInterface
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
-        /// This method only functions on mac.
+        /// This method only functions on mac, and works by executing the 'open' file, with the <paramref name="url"/> as parameter.
         /// </summary>
         /// <param name="url">The url to open.</param>
         private void OpenUrlMac(string url) => this.OpenUrlRaw("open", url);
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
-        /// This method only functions on unix.
+        /// This method only functions on unix, and works by executing the 'xdg-open' file, with the <paramref name="url"/> as parameter.
         /// </summary>
         /// <param name="url">The url to open.</param>
         private void OpenUrlUnix(string url) => this.OpenUrlRaw("xdg-open", url);
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
-        /// It does this by opening a shell, and then executing the 'start' command in it, followed by the url.
-        /// This method only functions on windows.
+        /// This method only functions on windows and works by calling the "ShellExecute" function in the "Shell32.dll" file.
         /// </summary>
         /// <param name="url">The url to open.</param>
         private static void OpenUrlWindows(string url)
