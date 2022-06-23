@@ -67,30 +67,40 @@ namespace BrowserInterface
         /// </summary>
         /// <param name="urlBase">The url to open.</param>
         /// <param name="queryParams">The query parameters to append to the url.</param>
+        /// <returns> A <see cref="bool"/>, which indicates whether the url was opened properly or not.</returns>
         /// <exception cref="PlatformNotSupportedException">If the platform is not unix, windows or mac.</exception>
         /// <exception cref="ArgumentException">If the <paramref name="urlBase"/> is not a http or https url.</exception>
         /// <exception cref="FormatException"> If the <paramref name="urlBase"/> is not a valid <see cref="Uri"/>. </exception>
         /// <exception cref="InvalidOperationException"> If the <paramref name="queryParams"/> contain duplicate keys after coalescing. </exception>
-        public void OpenUrl(string urlBase, Dictionary<object, object>? queryParams = null)
+        public bool OpenUrl(string urlBase, Dictionary<object, object>? queryParams = null)
         {
             string url = this.FormUrl(urlBase, queryParams);
 
+            int exitCode;
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                OpenUrlWindows(url);
+                exitCode = OpenUrlWindows(url);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                this.OpenUrlUnix(url);
+                exitCode = this.OpenUrlUnix(url);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                this.OpenUrlMac(url);
+                exitCode = this.OpenUrlMac(url);
             }
             else
             {
                 throw new PlatformNotSupportedException($"{nameof(BrowserHandler)} does not support opening urls for {RuntimeInformation.OSDescription}!");
             }
+
+            if(exitCode != 0)
+            {
+                Console.Error.WriteLine($"Warning: opening [{url}] failed with non-zero error code");
+            }
+
+            return exitCode == 0;
         }
 
         /// <summary>
@@ -148,44 +158,42 @@ namespace BrowserInterface
         /// Executes <paramref name="command"/> to open a <paramref name="url"/>, in the default web browser of the user. <br/>
         /// This method works on *NIX. <br/>
         /// </summary>
+        /// <returns>The exitcode of the command, after it has been run.</returns>
         /// <param name="url">The url to open.</param>
-        private void OpenUrlRaw(string command, string url)
+        private int OpenUrlRaw(string command, string url)
         {
             this._process.StartInfo.FileName = command;
             this._process.StartInfo.ArgumentList.Clear();
             this._process.StartInfo.ArgumentList.Add(url);
             this._process.Start();
             this._process.WaitForExit();
+
+            return this._process.ExitCode;
         }
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
         /// This method only functions on mac, and works by executing the 'open' file, with the <paramref name="url"/> as parameter.
         /// </summary>
+        /// <returns>The exitcode of the command, after it has been run.</returns>
         /// <param name="url">The url to open.</param>
-        private void OpenUrlMac(string url) => this.OpenUrlRaw("open", url);
+        private int OpenUrlMac(string url) => this.OpenUrlRaw("open", url);
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
         /// This method only functions on unix, and works by executing the 'xdg-open' file, with the <paramref name="url"/> as parameter.
         /// </summary>
+        /// <returns>The exitcode of the command, after it has been run.</returns>
         /// <param name="url">The url to open.</param>
-        private void OpenUrlUnix(string url) => this.OpenUrlRaw("xdg-open", url);
+        private int OpenUrlUnix(string url) => this.OpenUrlRaw("xdg-open", url);
 
         /// <summary>
         /// Opens a single <see cref="HttpMethod.Get"/> <paramref name="url"/>, in the default web browser of the user. <br/>
         /// This method only functions on windows and works by calling the "ShellExecute" function in the "Shell32.dll" file.
         /// </summary>
+        /// <returns>0 iff the shellexecute was succesfull, 1 otherwise.</returns>
         /// <param name="url">The url to open.</param>
-        private static void OpenUrlWindows(string url)
-        {
-            long res = ShellExecute(0, null, url, null, null, 1);
-
-            if (res < 32)
-            {
-                Console.Error.WriteLine($"Warning: opening {url} failed with exit code {res}!");
-            }
-        }
+        private static int OpenUrlWindows(string url) => ShellExecute(0, null, url, null, null, 1) < 32 ? 1 : 0;
 
         /// <summary>
         /// Disposes the <see cref="_process"/>, and removes contents of the <see cref="_stringBuilder"/>.
