@@ -97,7 +97,7 @@ namespace BrowserInterface
 
             if(exitCode != 0)
             {
-                Console.Error.WriteLine($"Warning: opening [{url}] failed with non-zero error code");
+                Console.Error.WriteLine($"Warning: opening [{url}] failed with non-zero error code [{exitCode}]!");
             }
 
             return exitCode == 0;
@@ -133,7 +133,7 @@ namespace BrowserInterface
 
             if (queryParams is Dictionary<object, object> { Count: > 0 } @params)
             {
-                if (@params.Keys.GroupBy(k => $"{k}").Any(c => c.Count() > 1))
+                if (@params.Keys.GroupBy(k => k.ToString()).Any(c => c.Count() > 1))
                 {
                     throw new InvalidOperationException($"Coalescing [{queryParams}] resulted in key colission!");
                 }
