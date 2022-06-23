@@ -133,7 +133,7 @@ namespace BrowserInterface
 
             if (queryParams is Dictionary<object, object> { Count: > 0 } @params)
             {
-                if (@params.Keys.GroupBy(k => k).Any(c => c.Count() > 1))
+                if (@params.Keys.GroupBy(k => $"{k}").Any(c => c.Count() > 1))
                 {
                     throw new InvalidOperationException($"Coalescing [{queryParams}] resulted in key colission!");
                 }
