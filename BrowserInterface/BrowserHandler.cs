@@ -15,20 +15,6 @@ namespace BrowserInterface
     public sealed class BrowserHandler : IDisposable
     {
         /// <summary>
-        /// Performs an operation on a specified file. <br/>
-        /// Note: documentation from this function is taken directly from <seealso cref="https://docs.microsoft.com/nl-nl/windows/win32/api/shellapi/nf-shellapi-shellexecutea"/>.
-        /// </summary>
-        /// <param name="hWnd">A handle to the parent window used for displaying a UI or error messages. This value can be NULL if the operation is not associated with a window.</param>
-        /// <param name="lpOperation">A pointer to a null-terminated string, referred to in this case as a verb, that specifies the action to be performed. The set of available verbs depends on the particular file or folder. Generally, the actions available from an object's shortcut menu are available verbs.</param>
-        /// <param name="lpFile">A pointer to a null-terminated string that specifies the file or object on which to execute the specified verb. To specify a Shell namespace object, pass the fully qualified parse name. Note that not all verbs are supported on all objects. For example, not all document types support the "print" verb. If a relative path is used for the lpDirectory parameter do not use a relative path for lpFile.</param>
-        /// <param name="lpParameters">If lpFile specifies an executable file, this parameter is a pointer to a null-terminated string that specifies the parameters to be passed to the application. The format of this string is determined by the verb that is to be invoked. If lpFile specifies a document file, lpParameters should be NULL.</param>
-        /// <param name="lpDirectory">A pointer to a null-terminated string that specifies the default (working) directory for the action. If this value is NULL, the current working directory is used. If a relative path is provided at lpFile, do not use a relative path for lpDirectory.</param>
-        /// <param name="nShowCmd">The flags that specify how an application is to be displayed when it is opened. If lpFile specifies a document file, the flag is simply passed to the associated application. It is up to the application to decide how to handle it. It can be any of the values that can be specified in the nCmdShow parameter for the ShowWindow function.</param>
-        /// <returns>A <see cref="long"/>, indicating success if the value is greater than 32.</returns>
-        [DllImport("Shell32.dll", BestFitMapping = true, CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-        private static extern long ShellExecute(int hWnd, string? lpOperation, string lpFile, string? lpParameters, string? lpDirectory, long nShowCmd);
-
-        /// <summary>
         /// The <see cref="Process"/> used to start a browser instance with.
         /// </summary>
         private readonly Process _process;
@@ -194,6 +180,20 @@ namespace BrowserInterface
         /// <returns>0 iff the shellexecute was succesfull, 1 otherwise.</returns>
         /// <param name="url">The url to open.</param>
         private static int OpenUrlWindows(string url) => ShellExecute(0, null, url, null, null, 1) < 32 ? 1 : 0;
+
+        /// <summary>
+        /// Performs an operation on a specified file. <br/>
+        /// Note: documentation from this function is taken directly from <seealso cref="https://docs.microsoft.com/nl-nl/windows/win32/api/shellapi/nf-shellapi-shellexecutea"/>.
+        /// </summary>
+        /// <param name="hWnd">A handle to the parent window used for displaying a UI or error messages. This value can be NULL if the operation is not associated with a window.</param>
+        /// <param name="lpOperation">A pointer to a null-terminated string, referred to in this case as a verb, that specifies the action to be performed. The set of available verbs depends on the particular file or folder. Generally, the actions available from an object's shortcut menu are available verbs.</param>
+        /// <param name="lpFile">A pointer to a null-terminated string that specifies the file or object on which to execute the specified verb. To specify a Shell namespace object, pass the fully qualified parse name. Note that not all verbs are supported on all objects. For example, not all document types support the "print" verb. If a relative path is used for the lpDirectory parameter do not use a relative path for lpFile.</param>
+        /// <param name="lpParameters">If lpFile specifies an executable file, this parameter is a pointer to a null-terminated string that specifies the parameters to be passed to the application. The format of this string is determined by the verb that is to be invoked. If lpFile specifies a document file, lpParameters should be NULL.</param>
+        /// <param name="lpDirectory">A pointer to a null-terminated string that specifies the default (working) directory for the action. If this value is NULL, the current working directory is used. If a relative path is provided at lpFile, do not use a relative path for lpDirectory.</param>
+        /// <param name="nShowCmd">The flags that specify how an application is to be displayed when it is opened. If lpFile specifies a document file, the flag is simply passed to the associated application. It is up to the application to decide how to handle it. It can be any of the values that can be specified in the nCmdShow parameter for the ShowWindow function.</param>
+        /// <returns>A <see cref="long"/>, indicating success if the value is greater than 32.</returns>
+        [DllImport("Shell32.dll", BestFitMapping = true, CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+        private static extern long ShellExecute(int hWnd, string? lpOperation, string lpFile, string? lpParameters, string? lpDirectory, long nShowCmd);
 
         /// <summary>
         /// Disposes the <see cref="_process"/>, and removes contents of the <see cref="_stringBuilder"/>.
