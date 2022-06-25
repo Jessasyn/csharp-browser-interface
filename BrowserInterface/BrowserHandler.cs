@@ -11,7 +11,6 @@ namespace BrowserInterface
     /// For (hopefully) obvious reasons, <see cref="HttpMethod.Post"/> is not supported. <br/>
     /// It is encouraged to use the <see cref="BrowserHandler"/> as service, or inside a <see langword="using"/> statement, so no memory leaks occur, however small.
     /// </summary>
-    [DebuggerDisplay($"{{{nameof(ToString)}(),nq}}")]
     public sealed class BrowserHandler : IDisposable
     {
         /// <summary>
@@ -60,6 +59,11 @@ namespace BrowserInterface
         /// <exception cref="InvalidOperationException"> If the <paramref name="queryParams"/> contain duplicate keys after coalescing. </exception>
         public bool OpenUrl(string urlBase, Dictionary<object, object>? queryParams = null)
         {
+            if (this._disposed)
+            {
+                throw new ObjectDisposedException(nameof(BrowserHandler));
+            }
+
             string url = this.FormUrl(urlBase, queryParams);
 
             int exitCode;
