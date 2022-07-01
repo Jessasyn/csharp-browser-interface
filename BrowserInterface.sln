@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserInterfaceTests", "BrowserInterfaceTests\BrowserInterfaceTests.csproj", "{A9991219-2EEF-4116-A7C5-A81E132B2174}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{25F2C3E2-49C5-49EA-88E0-E35862D9C7AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25F2C3E2-49C5-49EA-88E0-E35862D9C7AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25F2C3E2-49C5-49EA-88E0-E35862D9C7AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9991219-2EEF-4116-A7C5-A81E132B2174}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9991219-2EEF-4116-A7C5-A81E132B2174}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9991219-2EEF-4116-A7C5-A81E132B2174}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9991219-2EEF-4116-A7C5-A81E132B2174}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
