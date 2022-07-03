@@ -14,7 +14,7 @@ namespace BrowserInterface.Tests
 {
     /// <summary>
     /// Contains all unit tests which verify that the <see cref="BrowserHandler"/> works as intended. <br/>
-    /// Note that running these tests:
+    /// Note that running these tests: <br/>
     /// - will (likely) result in a large number of tabs opening on your browser. <br/>
     /// - in a CI environment will (likely) fail. <br/>
     /// - on a single machine only verifies the tests for that platform. <br/>
@@ -159,6 +159,12 @@ namespace BrowserInterface.Tests
     /// </summary>
     internal static class StringExtensions
     {
+        /// <summary>
+        /// Generates a random string of <paramref name="len"/> characters, where each character is uppercase, lowercase or a digit.
+        /// </summary>
+        /// <param name="random">The instance of <see cref="Random"/> which is used to generate a random number between 0 and 26.</param>
+        /// <param name="len">The length the string has to be.</param>
+        /// <returns>A <see cref="string"/>, of length <paramref name="len"/>, composed of random letters or digits.</returns>
         internal static string NextString(this Random random, int len)
         {
             StringBuilder stringBuilder = new StringBuilder();
@@ -171,6 +177,15 @@ namespace BrowserInterface.Tests
             return stringBuilder.ToString();
         }
 
+        /// <summary>
+        /// Generates a valid http url, which has <paramref name="segmentCount"/> random segments of length <paramref name="segmentLen"/>, separated by <paramref name="separator"/>.
+        /// </summary>
+        /// <param name="random">The instance of <see cref="Random"/> which is used to generate a random number between 0 and 26.</param>
+        /// <param name="segmentCount">The number of segments the url has to have.</param>
+        /// <param name="segmentLen">The length of each segment.</param>
+        /// <param name="trimEnd">Whether to remove the trailing separator or not.</param>
+        /// <param name="separator">The character to use to separate segments.</param>
+        /// <returns>A <see cref="string"/> containing the random url.</returns>
         internal static string NextUrl(this Random random, int segmentCount, int segmentLen, bool trimEnd = false, char separator = '/')
         {
             StringBuilder stringBuilder = new StringBuilder("http://www.");
