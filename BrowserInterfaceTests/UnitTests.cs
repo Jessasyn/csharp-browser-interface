@@ -72,16 +72,7 @@ namespace BrowserInterface.Tests
         {
             using BrowserHandler browserHandler = new BrowserHandler();
 
-            try
-            {
-                browserHandler.OpenUrl(string.Empty);
-            }
-            catch (FormatException)
-            {
-                return;
-            }
-
-            Assert.Fail($"{nameof(browserHandler)} should have thrown {nameof(FormatException)} with an empty string as input!");
+            Assert.ThrowsException<FormatException>(() => browserHandler.OpenUrl(string.Empty));
 
         }
         /// <summary>
@@ -93,7 +84,7 @@ namespace BrowserInterface.Tests
         {
             using BrowserHandler browserHandler = new BrowserHandler();
 
-            for(int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 Assert.IsTrue(browserHandler.OpenUrl(_random?.NextUrl(3, 15) ?? string.Empty));
             }
@@ -110,16 +101,7 @@ namespace BrowserInterface.Tests
 
             browserHandler.Dispose();
 
-            try
-            {
-                browserHandler.OpenUrl("http://www.google.com");
-            }
-            catch (ObjectDisposedException)
-            {
-                return;
-            }
-
-            Assert.Fail($"Disposed {nameof(browserHandler)} should have thrown a {nameof(ObjectDisposedException)}!");
+            Assert.ThrowsException<ObjectDisposedException>(() => browserHandler.OpenUrl("http://www.google.com"));
         }
 
         /// <summary>
@@ -131,16 +113,7 @@ namespace BrowserInterface.Tests
         {
             using BrowserHandler browserHandler = new BrowserHandler();
 
-            try
-            {
-                browserHandler.OpenUrl("ftp://www.google.com");
-            }
-            catch (ArgumentException)
-            {
-                return;
-            }
-
-            Assert.Fail($"{nameof(browserHandler)} should have thrown a {nameof(ArgumentException)} upon recieving an FTP url!");
+            Assert.ThrowsException<ArgumentException>(() => browserHandler.OpenUrl("ftp://www.google.com"));
         }
 
         /// <summary>
@@ -152,16 +125,7 @@ namespace BrowserInterface.Tests
         {
             using BrowserHandler browserHandler = new BrowserHandler();
 
-            try
-            {
-                browserHandler.OpenUrl(_random?.NextString(15) ?? string.Empty);
-            }
-            catch (FormatException)
-            {
-                return;
-            }
-
-            Assert.Fail($"{nameof(browserHandler)} should have thrown a {nameof(FormatException)} upon recieving an invalid url!");
+            Assert.ThrowsException<FormatException>(() => browserHandler.OpenUrl(_random?.NextString(15) ?? string.Empty));
         }
 
         /// <summary>
@@ -186,16 +150,7 @@ namespace BrowserInterface.Tests
         {
             using BrowserHandler browserHandler = new BrowserHandler();
 
-            try
-            {
-                browserHandler.OpenUrl("https://www.google.com", new Dictionary<object, object> { { "3", "3" }, { 3, "3" } });
-            }
-            catch (InvalidOperationException)
-            {
-                return;
-            }
-
-            Assert.Fail($"{nameof(browserHandler)} should have thrown an {nameof(InvalidOperationException)} upon detecting key colission!");
+            Assert.ThrowsException<InvalidOperationException>(() => browserHandler.OpenUrl("https://www.google.com", new Dictionary<object, object> { { "3", "3" }, { 3, "3" } }));
         }
     }
 
