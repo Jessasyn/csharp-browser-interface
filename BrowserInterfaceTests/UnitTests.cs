@@ -190,7 +190,7 @@ namespace BrowserInterface.Tests
         {
             StringBuilder stringBuilder = new StringBuilder("http://www.");
 
-            for(int i = 0; i < segmentCount; i++)
+            for (int i = 0; i < segmentCount; i++)
             {
                 stringBuilder.Append(random.NextString(segmentLen));
                 stringBuilder.Append(separator);
@@ -200,7 +200,7 @@ namespace BrowserInterface.Tests
             {
                 stringBuilder.Length--;
             }
-            
+
             return stringBuilder.ToString();
         }
     }

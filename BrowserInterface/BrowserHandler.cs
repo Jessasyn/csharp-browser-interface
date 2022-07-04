@@ -85,7 +85,7 @@ namespace BrowserInterface
                 throw new PlatformNotSupportedException($"{nameof(BrowserHandler)} does not support opening urls for {RuntimeInformation.OSDescription}!");
             }
 
-            if(exitCode != 0)
+            if (exitCode != 0)
             {
                 Console.Error.WriteLine($"Warning: opening [{url}] failed with non-zero error code [{exitCode}]!");
             }
