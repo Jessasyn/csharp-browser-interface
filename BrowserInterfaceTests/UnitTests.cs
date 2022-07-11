@@ -187,7 +187,7 @@ namespace BrowserInterface.Tests
         /// <returns>A <see cref="string"/> containing the random url.</returns>
         internal static string NextUrl(this Random random, int segmentCount, int segmentLen, bool trimEnd = false, char separator = '/')
         {
-            StringBuilder stringBuilder = new StringBuilder("http://www.");
+            StringBuilder stringBuilder = new StringBuilder($"http{(random.Next(1, 101) % 2 == 0 ? "s" : string.Empty)}://www.");
 
             for (int i = 0; i < segmentCount; i++)
             {
