@@ -143,7 +143,6 @@ namespace BrowserInterface.Tests
         /// <summary>
         /// Tests whether a <see cref="BrowserHandler"/> which recieves colliding query key values throws a <see cref="InvalidOperationException"/>.
         /// </summary>
-        /// <exception cref="Exception"></exception>
         [TestMethod]
         [TestCategory("Negative")]
         public void TestKeyCollission()

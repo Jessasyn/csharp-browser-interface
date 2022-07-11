@@ -104,20 +104,6 @@ namespace BrowserInterface
         /// <exception cref="InvalidOperationException"> If the <paramref name="queryParams"/> contain duplicate keys after coalescing. </exception>
         private string FormUrl(string urlBase, Dictionary<object, object>? queryParams = null)
         {
-            try
-            {
-                Uri uri = new Uri(urlBase);
-
-                if (uri.Scheme is not "https" and not "http")
-                {
-                    throw new ArgumentException($"Expected http(s) url, got {uri.Scheme}!");
-                }
-            }
-            catch (FormatException ex)
-            {
-                throw new FormatException($"Malformed url: {ex.Message}!");
-            }
-
             this._stringBuilder.Clear()
                                .Append(urlBase);
 
@@ -141,7 +127,23 @@ namespace BrowserInterface
                 this._stringBuilder.Length -= 1;
             }
 
-            return this._stringBuilder.ToString();
+            Uri uri;
+
+            try
+            {
+                uri = new Uri(this._stringBuilder.ToString());
+
+                if (uri.Scheme is not "https" and not "http")
+                {
+                    throw new ArgumentException($"Expected http(s) url, got {uri.Scheme}!");
+                }
+            }
+            catch (FormatException ex)
+            {
+                throw new FormatException($"Malformed url: {ex.Message}!");
+            }
+
+            return uri.ToString();
         }
 
         /// <summary>
